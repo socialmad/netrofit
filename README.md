@@ -67,26 +67,23 @@ flutter pub get
 Create your API interface with annotations:
 
 ```dart
-// lib/api/users_api.dart
-import 'dart:convert';  // Required for jsonDecode
-
+// lib/api/countries_api.dart
 import 'package:netrofit_all/netrofit_all.dart';
-import '../models/user.dart';
+import '../models/country.dart';
 
-part 'users_api.netrofit.g.dart';
+part 'countries_api.netrofit.g.dart';
 
-@RestApi(baseUrl: 'https://api.example.com')
-abstract class UsersApi {
-  factory UsersApi({required HttpAdapter httpAdapter}) = _$UsersApiImpl;
+@RestApi(baseUrl: 'https://restcountries.com/v3.1')
+abstract class CountriesApi {
+  factory CountriesApi({required HttpAdapter httpAdapter}) = _$CountriesApiImpl;
 
-  @Get('/users')
-  Future<ApiResult<List<User>>> getUsers();
+  static const _fields = 'name,capital,region,population,flags,cca2';
 
-  @Get('/users/{id}')
-  Future<ApiResult<User>> getUser(@Path() int id);
+  @Get('/all?fields=$_fields')
+  Future<ApiResult<List<Country>>> getAllCountries();
 
-  @Post('/users')
-  Future<ApiResult<User>> createUser(@Body() User user);
+  @Get('/name/{name}?fields=$_fields')
+  Future<ApiResult<List<Country>>> searchByName(@Path() String name);
 }
 ```
 
@@ -102,7 +99,7 @@ dart run build_runner clean
 dart run build_runner build --delete-conflicting-outputs
 
 # Rename the generated file (required)
-mv lib/api/users_api.netrofit.g.part lib/api/users_api.netrofit.g.dart
+mv lib/api/countries_api.netrofit.g.part lib/api/countries_api.netrofit.g.dart
 ```
 
 > **Note**: The generator creates a `.part` file that needs to be renamed to `.g.dart`. This is a known limitation we're working to fix.
@@ -114,14 +111,19 @@ mv lib/api/users_api.netrofit.g.part lib/api/users_api.netrofit.g.dart
 final httpAdapter = HttpPackageAdapter(
   interceptors: [LoggingInterceptor(level: LogLevel.basic)],
 );
-final api = UsersApi(httpAdapter: httpAdapter);
+final api = CountriesApi(httpAdapter: httpAdapter);
 
 // Make API calls
-final result = await api.getUsers();
+final result = await api.getAllCountries();
 
 // Handle the result
 result.when(
-  success: (users) => print('Got ${users.length} users'),
+  success: (countries) {
+    print('Got ${countries.length} countries');
+    for (var country in countries) {
+      print('- ${country.name.common} (${country.region})');
+    }
+  },
   failure: (error) => print('Error: ${error.message}'),
 );
 ```
@@ -135,60 +137,71 @@ result.when(
 ### Step 1: Create Your Model
 
 ```dart
-// lib/models/user.dart
+// lib/models/country.dart
 import 'package:json_annotation/json_annotation.dart';
 
-part 'user.g.dart';
+part 'country.g.dart';
 
 @JsonSerializable()
-class User {
-  final int id;
-  final String name;
-  final String email;
+class Country {
+  final CountryName name;
+  final String region;
+  final CountryFlags flags;
 
-  const User({required this.id, required this.name, required this.email});
+  const Country({
+    required this.name,
+    required this.region,
+    required this.flags,
+  });
 
-  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
-  Map<String, dynamic> toJson() => _$UserToJson(this);
+  factory Country.fromJson(Map<String, dynamic> json) => _$CountryFromJson(json);
+  Map<String, dynamic> toJson() => _$CountryToJson(this);
+}
+
+@JsonSerializable()
+class CountryName {
+  final String common;
+  const CountryName({required this.common});
+  factory CountryName.fromJson(Map<String, dynamic> json) => _$CountryNameFromJson(json);
+  Map<String, dynamic> toJson() => _$CountryNameToJson(this);
+}
+
+@JsonSerializable()
+class CountryFlags {
+  final String png;
+  const CountryFlags({required this.png});
+  factory CountryFlags.fromJson(Map<String, dynamic> json) => _$CountryFlagsFromJson(json);
+  Map<String, dynamic> toJson() => _$CountryFlagsToJson(this);
 }
 ```
 
 ### Step 2: Define API Endpoints
 
 ```dart
-// lib/api/users_api.dart
+// lib/api/countries_api.dart
 import 'package:netrofit_all/netrofit_all.dart';
-import '../models/user.dart';
+import '../models/country.dart';
 
-part 'users_api.netrofit.g.dart';
+part 'countries_api.netrofit.g.dart';
 
-@RestApi(baseUrl: 'https://jsonplaceholder.typicode.com')
-abstract class UsersApi {
-  factory UsersApi({required HttpAdapter httpAdapter}) = _$UsersApiImpl;
+@RestApi(baseUrl: 'https://restcountries.com/v3.1')
+abstract class CountriesApi {
+  factory CountriesApi({required HttpAdapter httpAdapter}) = _$CountriesApiImpl;
 
-  // GET request
-  @Get('/users')
-  Future<ApiResult<List<User>>> getUsers();
+  // Constants for query parameters
+  static const _fields = 'name,capital,region,population,flags,cca2';
+
+  // GET request with query parameter
+  @Get('/all?fields=$_fields')
+  Future<ApiResult<List<Country>>> getAllCountries();
 
   // GET with path parameter
-  @Get('/users/{id}')
-  Future<ApiResult<User>> getUser(@Path() int id);
+  @Get('/name/{name}?fields=$_fields')
+  Future<ApiResult<List<Country>>> searchByName(@Path() String name);
 
-  // POST with body
-  @Post('/users')
-  Future<ApiResult<User>> createUser(@Body() User user);
-
-  // PUT with path and body
-  @Put('/users/{id}')
-  Future<ApiResult<User>> updateUser(@Path() int id, @Body() User user);
-
-  // DELETE
-  @Delete('/users/{id}')
-  Future<ApiResult<void>> deleteUser(@Path() int id);
-
-  // Query parameters
-  @Get('/users')
-  Future<ApiResult<List<User>>> searchUsers(@Query('name') String name);
+  // GET with path parameter
+  @Get('/region/{region}?fields=$_fields')
+  Future<ApiResult<List<Country>>> getByRegion(@Path() String region);
 }
 ```
 
@@ -198,35 +211,42 @@ abstract class UsersApi {
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-This generates `users_api.netrofit.g.dart` and `user.g.dart` automatically!
+This generates `countries_api.netrofit.g.dart` and `country.g.dart` automatically!
 
 ### Step 4: Initialize and Use
 
 ```dart
+// lib/services/countries_service.dart
 import 'package:netrofit_all/netrofit_all.dart';
-import 'api/users_api.dart';
+import '../api/countries_api.dart';
 
-void main() async {
-  // Create HTTP adapter with interceptors
-  final httpAdapter = HttpPackageAdapter(
-    interceptors: [
-      LoggingInterceptor(level: LogLevel.basic),
-      RetryInterceptor(maxRetries: 3),
-    ],
-  );
+class CountriesService {
+  late final CountriesApi api;
 
-  // Create API instance
-  final api = UsersApi(httpAdapter: httpAdapter);
+  CountriesService() {
+    final httpAdapter = HttpPackageAdapter(
+      interceptors: [
+        LoggingInterceptor(level: LogLevel.basic),
+        RetryInterceptor(maxRetries: 3),
+      ],
+    );
+    api = CountriesApi(httpAdapter: httpAdapter);
+  }
+}
 
-  // Make API calls
-  final result = await api.getUsers();
+// Usage in your app (e.g., in a Cubit/Bloc)
+void loadCountries() async {
+  final service = CountriesService();
+  
+  // Make API call
+  final result = await service.api.getAllCountries();
 
   // Handle result
   result.when(
-    success: (users) {
-      print('Success! Got ${users.length} users');
-      for (var user in users) {
-        print('- ${user.name} (${user.email})');
+    success: (countries) {
+      print('Success! Got ${countries.length} countries');
+      for (var country in countries) {
+        print('- ${country.name.common} (${country.region})');
       }
     },
     failure: (error) {
@@ -255,24 +275,28 @@ result.when(
 );
 
 // Convenience methods
-final user = result.dataOrNull;  // Returns data or null
+final countries = result.dataOrNull;  // Returns List<Country> or null
 final error = result.errorOrNull;  // Returns error or null
 
 try {
-  final user = result.unwrap();  // Throws on error
-  print(user.name);
+  final countries = result.unwrap();  // Throws on error
+  print(countries.first.name.common);
 } catch (e) {
   print('Failed: $e');
 }
 
-// Chain API calls
-final posts = await api.getUser(1)
-    .then((r) => r.flatMap((user) => api.getUserPosts(user.id)));
+// Chain API calls (e.g., search then filter by region)
+final result = await api.searchByName('United')
+    .then((r) => r.flatMap((countries) {
+        // This is a contrived example for chaining
+        final first = countries.first;
+        return api.getByRegion(first.region);
+    }));
 
 // Async chaining
-final result = await api.getUser(1)
-    .then((r) => r.thenAsync((user) async {
-      return api.getUserPosts(user.id);
+final result = await api.searchByName('United')
+    .then((r) => r.thenAsync((countries) async {
+       return await api.getByRegion(countries.first.region);
     }));
 ```
 
@@ -326,33 +350,33 @@ final httpAdapter = HttpPackageAdapter(
 import 'package:netrofit_all/netrofit_all.dart';
 
 void main() {
-  test('API returns users', () async {
+  test('API returns countries', () async {
     // Create mock adapter
     final mockAdapter = MockAdapter({
-      '/users': MockResponse(
-        body: '[{"id": 1, "name": "Test User", "email": "test@example.com"}]',
+      '/all': MockResponse(
+        body: '[{"name": {"common": "United Kingdoms"}, "region": "Europe", "flags": {"png": "url"}}]',
         statusCode: 200,
       ),
     });
 
-    final api = UsersApi(httpAdapter: mockAdapter);
-    final result = await api.getUsers();
+    final api = CountriesApi(httpAdapter: mockAdapter);
+    final result = await api.getAllCountries();
 
     expect(result.isSuccess, true);
     expect(result.data!.length, 1);
-    expect(result.data!.first.name, 'Test User');
+    expect(result.data!.first.name.common, 'United Kingdoms');
   });
 
   test('API handles errors', () async {
     final mockAdapter = MockAdapter({
-      '/users/999': MockResponse.error(
-        message: 'User not found',
+      '/name/Invalid': MockResponse.error(
+        message: 'Not found',
         statusCode: 404,
       ),
     });
 
-    final api = UsersApi(httpAdapter: mockAdapter);
-    final result = await api.getUser(999);
+    final api = CountriesApi(httpAdapter: mockAdapter);
+    final result = await api.searchByName('Invalid');
 
     expect(result.isFailure, true);
     expect(result.error!.statusCode, 404);
