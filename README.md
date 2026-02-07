@@ -1,5 +1,15 @@
 # Netrofit
 
+> [!IMPORTANT]
+> **🚧 Work in Progress - Call for Community Feedback 🚧**
+>
+> **Netrofit** is currently in active development and **not yet published on pub.dev**.
+>
+> We are sharing it early to gather feedback from the Flutter community.
+> - 📢 **We want your input!** Please open an issue to suggest features, report bugs, or discuss the API design.
+> - ⚠️ **Breaking changes** may occur as we refine the library based on your feedback.
+> - 📦 **Installation**: See the updated [Quick Start](#-quick-start) guide to use the Git dependency.
+
 **Type-safe HTTP client for Dart & Flutter** with annotation-based API definitions and code generation. Define your REST API once, generate type-safe code, and get automatic error handling.
 
 [![Dart](https://img.shields.io/badge/dart-%3E%3D3.5-blue.svg)](https://dart.dev/)
@@ -26,11 +36,23 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  netrofit_all: ^1.0.0        # All-in-one package
+  # Netrofit (Git dependency)
+  netrofit_all:
+    git:
+      url: https://github.com/user/netrofit.git
+      path: packages/netrofit_all
+      ref: main
+  
   json_annotation: ^4.9.0      # For JSON serialization
 
 dev_dependencies:
-  netrofit_generator: ^1.0.0   # Code generator
+  # Code generator (Git dependency)
+  netrofit_generator:
+    git:
+      url: https://github.com/user/netrofit.git
+      path: packages/netrofit_generator
+      ref: main
+
   build_runner: ^2.4.0         # Build system
   json_serializable: ^6.8.0    # JSON code generator
 ```
