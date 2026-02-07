@@ -1,0 +1,20 @@
+name: netrofit_http
+description: HTTP adapter layer for Netrofit with SSL pinning, multipart support, and interceptors.
+version: 1.0.0
+resolution: workspace
+homepage: https://github.com/user/netrofit
+repository: https://github.com/user/netrofit/tree/main/packages/netrofit_http
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  http: ^1.2.0
+  netrofit_core:
+    path: ../netrofit_core
+  netrofit_result:
+    path: ../netrofit_result
+
+dev_dependencies:
+  test: ^1.24.0
+  mockito: ^5.4.0

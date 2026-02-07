@@ -1,0 +1,7 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  exclude:
+    - example/**  # Example requires build_runner; analyze packages only from root
+  errors:
+    invalid_dependency: ignore  # Workspace uses path deps; use version when publishing

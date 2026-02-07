@@ -1,0 +1,14 @@
+name: netrofit_result
+description: Unified API response wrapper and error system for Netrofit.
+version: 1.0.0
+resolution: workspace
+homepage: https://github.com/user/netrofit
+repository: https://github.com/user/netrofit/tree/main/packages/netrofit_result
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies: {}
+
+dev_dependencies:
+  test: ^1.24.0

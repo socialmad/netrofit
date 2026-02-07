@@ -1,0 +1,16 @@
+name: netrofit_core
+description: Core contracts, interfaces, and configuration for Netrofit.
+version: 1.0.0
+resolution: workspace
+homepage: https://github.com/user/netrofit
+repository: https://github.com/user/netrofit/tree/main/packages/netrofit_core
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  netrofit_result:
+    path: ../netrofit_result
+
+dev_dependencies:
+  test: ^1.24.0

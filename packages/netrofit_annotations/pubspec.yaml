@@ -1,0 +1,14 @@
+name: netrofit_annotations
+description: Annotations for defining REST APIs with Netrofit.
+version: 1.0.0
+resolution: workspace
+homepage: https://github.com/user/netrofit
+repository: https://github.com/user/netrofit/tree/main/packages/netrofit_annotations
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies: {}
+
+dev_dependencies:
+  test: ^1.24.0

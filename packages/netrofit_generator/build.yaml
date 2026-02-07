@@ -1,0 +1,7 @@
+builders:
+  netrofit:
+    import: "package:netrofit_generator/builder.dart"
+    builder_factories: ["netrofitBuilder"]
+    build_extensions: {".dart": [".netrofit.g.dart"]}
+    auto_apply: dependents
+    build_to: source

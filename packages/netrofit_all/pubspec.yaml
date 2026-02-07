@@ -1,0 +1,19 @@
+name: netrofit_all
+description: Single dependency that re-exports Netrofit core, annotations, HTTP adapter, and result.
+version: 1.0.0
+resolution: workspace
+homepage: https://github.com/user/netrofit
+repository: https://github.com/user/netrofit/tree/main/packages/netrofit_all
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  netrofit_core:
+    path: ../netrofit_core
+  netrofit_annotations:
+    path: ../netrofit_annotations
+  netrofit_http:
+    path: ../netrofit_http
+  netrofit_result:
+    path: ../netrofit_result

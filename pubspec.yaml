@@ -1,0 +1,18 @@
+name: netrofit
+description: A production-ready Retrofit-like API abstraction for Dart/Flutter with code generation.
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+workspace:
+  - packages/netrofit_result
+  - packages/netrofit_core
+  - packages/netrofit_annotations
+  - packages/netrofit_http
+  - packages/netrofit_generator
+  - packages/netrofit_cli
+  - packages/netrofit_all
+  - demo_app
+
+dev_dependencies:
+  lints: ^3.0.0
